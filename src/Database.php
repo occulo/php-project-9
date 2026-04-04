@@ -10,10 +10,10 @@ class Database
 
         $name = trim($db['path'], '/');
         $host = $db['host'];
-        $port = $db['port'];
         $user = $db['user'];
         $password = $db['pass'];
 
-        return new \PDO("pgsql:host=$host;port=$port;dbname=$name", $user, $password);
+        $dsn = sprintf("pgsql:host=%s;dbname=%s", $host, $name);
+        return new \PDO($dsn, $user, $password);
     }
 }
