@@ -5,6 +5,6 @@
 <form action="/urls" method="POST">
     <div class="d-flex">
         <input class="form-control me-2" type="url" name="url" placeholder="https://www.example.com" aria-label="url" />
-        <button type="submit" class="btn btn-primary">Проверить</button>
+        <input type="submit" class="btn btn-primary" value="Проверить" />
     </div>
 </form>
