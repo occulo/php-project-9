@@ -54,21 +54,32 @@ $app->get('/urls', function (Request $request, Response $response, $args) use ($
 });
 
 $app->post('/urls', function (Request $request, Response $response, $args) use ($repo) {
+    $routeParser = $this->getRouteCollector()->getRouteParser();
     $flash = $this->get(Messages::class);
     $data = $request->getParsedBody();
-    $url = trim($data['url'] ?? '');
 
+    $url = trim($data['url'] ?? '');
     $parsedUrl = parse_url($url);
-    $normalizedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+    $normalizedUrl = sprintf("%s://%s", $parsedUrl['scheme'], $parsedUrl['host']);
 
     if ($existing = $repo->getByName($normalizedUrl)) {
-        $flash->addMessage('warning', 'Страница уже существует');
-        return $response->withStatus(302)->withHeader('Location', '/urls/' . $existing['id']);
+        $flash->addMessage("warning", "Страница уже существует");
+        return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['id' => $existing['id']]));
     }
 
     $id = $repo->insert($normalizedUrl);
-    $flash->addMessage('success', 'Страница успешно добавлена');
-    return $response->withStatus(302)->withHeader('Location', '/urls/' . $id);
+    $flash->addMessage("success", "Страница успешно добавлена");
+    return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['id' => $id]));
 });
+
+$app->get('/urls/{id}', function (Request $request, Response $response, $args) use ($renderer, $repo) {
+    $flash = $this->get(Messages::class);
+    $url = $repo->getById($args['id']);
+    return $renderer->render($response, 'url.php', [
+        'title' => 'Анализатор страниц - Детали',
+        'url' => $url,
+        'flash' => $flash
+    ]);
+})->setName('url');
 
 $app->run();
