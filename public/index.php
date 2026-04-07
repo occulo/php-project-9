@@ -64,7 +64,10 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
 
     if ($existing = $repo->getByName($normalizedUrl)) {
         $flash->addMessage("warning", "Страница уже существует");
-        return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['id' => $existing['id']]));
+        return $response->withStatus(302)->withHeader(
+            'Location',
+            $routeParser->urlFor('url', ['id' => $existing['id']])
+        );
     }
 
     $id = $repo->insert($normalizedUrl);
