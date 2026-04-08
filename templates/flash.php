@@ -1,8 +1,7 @@
 <?php if (isset($flash)): ?>
-    <?php $data = $flash->getMessages(); ?>
-    <?php foreach ($data as $type => $messages): ?>
+    <?php foreach ($flash as $type => $messages): ?>
         <?php foreach ($messages as $message): ?>
-            <div class="container alert alert-<?= $type ?>" role="alert">
+            <div class="container alert alert-<?= $type ?: 'warning' ?>" role="alert">
                 <?= htmlspecialchars($message) ?>
             </div>
         <?php endforeach; ?>
