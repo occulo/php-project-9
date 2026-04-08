@@ -4,7 +4,7 @@
 </p>
 <form action="/urls" method="POST">
     <div class="d-flex">
-        <input class="form-control me-2" type="url" name="url" placeholder="https://www.example.com" aria-label="url" />
+        <input type="url" name="url" class="form-control me-2" placeholder="https://www.example.com" value="<?= htmlspecialchars($urlValue ?? '') ?>" aria-label="url" />
         <input type="submit" class="btn btn-primary" value="Проверить" />
     </div>
 </form>
