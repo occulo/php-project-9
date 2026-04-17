@@ -18,7 +18,7 @@ class CheckRepository
         return $stmt->fetchAll() ?: [];
     }
 
-    public function insert(array $check): int
+    public function insert(int $id, int $status, string $h1, string $title, string $description): int
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
@@ -26,11 +26,11 @@ class CheckRepository
             RETURNING id"
         );
         $stmt->execute([
-            'url_id' => $check['url_id'],
-            'status_code' => $check['status_code'],
-            'h1' => $check['h1'],
-            'title' => $check['title'],
-            'description' => $check['description'],
+            'url_id' => $id,
+            'status_code' => $status,
+            'h1' => $h1,
+            'title' => $title,
+            'description' => $description,
         ]);
         $data = $stmt->fetchColumn();
         if ($data === false) {
