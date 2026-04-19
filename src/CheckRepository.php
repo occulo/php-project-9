@@ -18,7 +18,7 @@ class CheckRepository
         return $stmt->fetchAll() ?: [];
     }
 
-    public function insert(int $id, int $status, string $h1, string $title, string $description): int
+    public function insert(int $id, int $status, ?string $h1, ?string $title, ?string $description): int
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
