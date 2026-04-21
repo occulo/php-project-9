@@ -13,7 +13,7 @@ class CheckRepository
 
     public function getByUrlId(int $id): array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM url_checks WHERE url_id = :url_id");
+        $stmt = $this->pdo->prepare("SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at DESC");
         $stmt->execute(['url_id' => $id]);
         return $stmt->fetchAll() ?: [];
     }
