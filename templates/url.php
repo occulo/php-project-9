@@ -1,10 +1,10 @@
 <?php
 function truncate(?string $str, int $length = 200): string
 {
-  if ($str === null || mb_strlen($str) <= $length) {
-      return htmlspecialchars($str ?? '');
-  }
-  return sprintf("%s...", htmlspecialchars(mb_substr($str, 0, $length)));
+    if ($str === null || mb_strlen($str) <= $length) {
+        return htmlspecialchars($str ?? '');
+    }
+    return sprintf("%s...", htmlspecialchars(mb_substr($str, 0, $length)));
 }
 ?>
 
@@ -46,7 +46,7 @@ function truncate(?string $str, int $length = 200): string
       </tr>
     </thead>
     <tbody>
-      <?php foreach ($checks as $check): ?>
+      <?php foreach ($checks as $check) : ?>
       <tr>
         <th scope="row"><?= $check['id'] ?></th>
         <td><?= $check['status_code'] ?></td>

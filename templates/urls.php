@@ -10,21 +10,21 @@
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($urls as $url): ?>
+    <?php foreach ($urls as $url) : ?>
     <tr>
       <th scope="row"><?= $url['id'] ?></th>
       <td><a href="/urls/<?= $url['id'] ?>" aria-label="<?= $url['name'] ?>"><?= $url['name'] ?></a></td>
       <td>
-        <?php if ($url['last_checked_at']): ?>
-          <?= date('d.m.Y H:i', strtotime($url['last_checked_at'])) ?>
-        <?php else: ?>
+        <?php if ($url['last_checked_at']) : ?>
+            <?= date('d.m.Y H:i', strtotime($url['last_checked_at'])) ?>
+        <?php else : ?>
           <span class="text-muted">---</span>
         <?php endif ?>
       </td>
       <td>
-        <?php if ($url['status_code']): ?>
-          <?= $url['status_code'] ?>
-        <?php else: ?>
+        <?php if ($url['status_code']) : ?>
+            <?= $url['status_code'] ?>
+        <?php else : ?>
           <span class="text-muted">---</span>
         <?php endif ?>
       </td>
