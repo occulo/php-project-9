@@ -18,6 +18,9 @@
         "squizlabs/php_codesniffer": "^4.0"
     },
     "autoload": {
+        "files": [
+            "src/helpers.php"
+        ],
         "psr-4": {
             "Hexlet\\Code\\": "src/"
         }
