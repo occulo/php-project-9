@@ -33,7 +33,7 @@
     </main>
     <div class="container">
         <footer class="d-flex flex-wrap justify-content-md-center align-items-center p-4 my-4 border-top">
-            <a href="/" aria-label="Github" class="link-body-emphasis text-decoration-none text-body-secondary">
+            <a href="https://github.com/occulo/php-project-9" aria-label="Github" class="link-body-emphasis text-decoration-none text-body-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" height="32" fill="currentColor" class="bi bi-github"
                     viewBox="0 0 16 16">
                     <path
