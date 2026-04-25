@@ -136,7 +136,7 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (
         $status = $check->getStatusCode();
         $html = $check->getBody()->getContents();
     } catch (\Throwable $th) {
-        $flash->addMessage('danger', 'Сайт недоступен');
+        $flash->addMessage('danger', 'Произошла ошибка при проверке, не удалось подключиться');
         return $response->withStatus(302)->withHeader(
             'Location',
             $routeParser->urlFor('url', ['url_id' => $args['url_id']])
