@@ -98,7 +98,7 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
     return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['url_id' => $id]));
 });
 
-$app->get('/urls/{url_id}', function (
+$app->get('/urls/{url_id:[0-9]+}', function (
     Request $request,
     Response $response,
     array $args
@@ -118,7 +118,7 @@ $app->get('/urls/{url_id}', function (
     ]);
 })->setName('url');
 
-$app->post('/urls/{url_id}/checks', function (
+$app->post('/urls/{url_id:[0-9]+}/checks', function (
     Request $request,
     Response $response,
     $args
