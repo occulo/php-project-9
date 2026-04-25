@@ -1,3 +1,13 @@
+<?php
+function truncate(?string $str, int $length = 200): string
+{
+  if ($str === null || mb_strlen($str) <= $length) {
+      return htmlspecialchars($str ?? '');
+  }
+  return sprintf("%s...", htmlspecialchars(mb_substr($str, 0, $length)));
+}
+?>
+
 <h1>Сайт: <?= $url['name'] ?></h1>
 <div class="table-responsive my-3">
   <table class="table table-bordered table-hover text-nowrap" data-test="url">
@@ -40,9 +50,9 @@
       <tr>
         <th scope="row"><?= $check['id'] ?></th>
         <td><?= $check['status_code'] ?></td>
-        <td><?= $check['h1'] ?></td>
-        <td><?= $check['title'] ?></td>
-        <td><?= $check['description'] ?></td>
+        <td><?= truncate($check['h1']) ?></td>
+        <td><?= truncate($check['title']) ?></td>
+        <td><?= truncate($check['description']) ?></td>
         <td><?= date('d.m.Y H:i', strtotime($check['created_at'])) ?></td>
       </tr>
       <?php endforeach ?>
