@@ -19,7 +19,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 session_start();
 
 // Database
-$pdo = Database::connect(getenv('DATABASE_URL'));
+$dbUrl = getenv('DATABASE_URL');
+if (!is_string($dbUrl)) {
+    throw new \Exception("DATABASE_URL is not set");
+}
+$pdo = Database::connect($dbUrl);
 $urlRepo = new UrlRepository($pdo);
 $checkRepo = new CheckRepository($pdo);
 
@@ -66,36 +70,44 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
     $routeParser = RouteContext::fromRequest($request)->getRouteParser();
     $flash = $this->get(Messages::class);
     $data = $request->getParsedBody();
+    $data = is_array($data) ? $data : [];
 
     $validator = new Validator($data);
     $validator->rule('required', 'url')->message('URL не должен быть пустым');
     $validator->rule('lengthMax', 'url', 255)->message('URL превышает 255 символов');
     $validator->rule('url', 'url')->message('Некорректный URL');
 
+    $url = trim($data['url'] ?? '');
+
     if (!$validator->validate()) {
-        $validatorErrors = array_merge(...array_values($validator->errors()));
+        $validatorErrors = [];
+        foreach ($validator->errors() as $fieldErrors) {
+            $validatorErrors = array_merge($validatorErrors, $fieldErrors);
+        }
         return $renderer->render($response, 'index.php', [
             'title' => 'Анализатор страниц',
-            'urlValue' => $data['url'],
+            'urlValue' => $url,
             'flash' => ['danger' => $validatorErrors]
         ])->withStatus(422);
     }
 
-    $url = trim($data['url']);
     $parsedUrl = parse_url($url);
+    if (!isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+        throw new \Exception("URL is invalid");
+    }
     $normalizedUrl = sprintf("%s://%s", $parsedUrl['scheme'], $parsedUrl['host']);
 
     if ($existing = $urlRepo->getByName($normalizedUrl)) {
         $flash->addMessage('warning', 'Страница уже существует');
         return $response->withStatus(302)->withHeader(
             'Location',
-            $routeParser->urlFor('url', ['url_id' => $existing['id']])
+            $routeParser->urlFor('url', ['url_id' => (string) $existing['id']])
         );
     }
 
     $id = $urlRepo->insert($normalizedUrl);
     $flash->addMessage('success', 'Страница успешно добавлена');
-    return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['url_id' => $id]));
+    return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['url_id' => (string) $id]));
 });
 
 $app->get('/urls/{url_id:[0-9]+}', function (
@@ -109,6 +121,9 @@ $app->get('/urls/{url_id:[0-9]+}', function (
 ) {
     $flash = $this->get(Messages::class);
     $url = $urlRepo->getById($args['url_id']);
+    if ($url === null) {
+        throw new \Exception("URL not found");
+    }
     $checks = $checkRepo->getByUrlId($args['url_id']);
     return $renderer->render($response, 'url.php', [
         'title' => 'Анализатор страниц - Детали',
@@ -131,6 +146,10 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (
     $flash = $this->get(Messages::class);
 
     $url = $urlRepo->getById($args['url_id']);
+    if ($url === null) {
+        throw new \Exception("URL not found");
+    }
+
     try {
         $check = $client->get($url['name']);
         $status = $check->getStatusCode();
@@ -139,7 +158,7 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (
         $flash->addMessage('danger', 'Произошла ошибка при проверке, не удалось подключиться');
         return $response->withStatus(302)->withHeader(
             'Location',
-            $routeParser->urlFor('url', ['url_id' => $args['url_id']])
+            $routeParser->urlFor('url', ['url_id' => (string) $args['url_id']])
         );
     }
 
@@ -153,7 +172,7 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (
     $flash->addMessage('success', 'Страница успешно проверена');
     return $response->withStatus(302)->withHeader(
         'Location',
-        $routeParser->urlFor('url', ['url_id' => $args['url_id']])
+        $routeParser->urlFor('url', ['url_id' => (string) $args['url_id']])
     );
 });
 
