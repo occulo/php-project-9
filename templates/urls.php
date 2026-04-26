@@ -1,3 +1,6 @@
+<?php
+/** @var array $urls */
+?>
 <h1>Сайты</h1>
 <div class="table-responsive-sm mt-3">
 <table class="table table-bordered table-hover" data-test="urls">

@@ -1,3 +1,7 @@
+<?php
+/** @var array $url */
+/** @var array $checks */
+?>
 <h1>Сайт: <?= $url['name'] ?></h1>
 <div class="table-responsive my-3">
   <table class="table table-bordered table-hover text-nowrap" data-test="url">
