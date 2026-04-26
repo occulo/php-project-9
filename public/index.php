@@ -80,10 +80,11 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
     $url = trim($data['url'] ?? '');
 
     if (!$validator->validate()) {
-        $validatorErrors = [];
-        foreach ($validator->errors() as $fieldErrors) {
-            $validatorErrors = array_merge($validatorErrors, $fieldErrors);
+        $errors = $validator->errors();
+        if (!is_array($errors)) {
+            $errors = [];
         }
+        $validatorErrors = array_merge(...array_values($errors));
         return $renderer->render($response, 'index.php', [
             'title' => 'Анализатор страниц',
             'urlValue' => $url,
