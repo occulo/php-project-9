@@ -44,11 +44,7 @@ class UrlRepository
             ORDER BY last_checked_at DESC NULLS LAST
         ");
         $stmt->execute();
-        $result = $stmt->fetchAll();
-        if ($result === false) {
-            throw new \Exception("Failed to fetch");
-        }
-        return $result;
+        return $stmt->fetchAll();
     }
 
     public function insert(string $name): int
