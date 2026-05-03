@@ -11,6 +11,16 @@ class CheckRepository
         $this->pdo = $pdo;
     }
 
+    public function getAllLatest(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT DISTINCT ON (url_id) url_id, created_at as last_checked_at, status_code
+            FROM url_checks
+            ORDER BY url_id, created_at DESC"
+        );
+        return $stmt->fetchAll(\PDO::FETCH_UNIQUE);
+    }
+
     public function getByUrlId(int $id): array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at DESC");
