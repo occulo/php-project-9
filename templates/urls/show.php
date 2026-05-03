@@ -2,7 +2,7 @@
 /** @var array $url */
 /** @var array $checks */
 ?>
-<h1>Сайт: <?= $url['name'] ?></h1>
+<h1 class="fw-normal">Сайт: <?= htmlspecialchars($url['name']) ?></h1>
 <div class="table-responsive my-3">
   <table class="table table-bordered table-hover text-nowrap" data-test="url">
     <tbody>
@@ -12,7 +12,9 @@
       </tr>
       <tr>
         <th scope="row">Имя</th>
-        <td><a href="<?= $url['name'] ?>" aria-label="<?= $url['name'] ?>"><?= $url['name'] ?></a></td>
+        <td>
+          <a href="<?= htmlspecialchars($url['name']) ?>" aria-label="<?= htmlspecialchars($url['name']) ?>"><?= htmlspecialchars($url['name']) ?></a>
+        </td>
       </tr>
       <tr>
         <th scope="row">Дата создания</th>
@@ -22,8 +24,8 @@
   </table>
 </div>
 <div class="d-flex justify-content-between align-items-center">
-  <h3>Проверки</h3>
-  <form method="post" action="/urls/<?= $url['id'] ?>/checks">
+  <h2 class="fw-normal">Проверки</h2>
+  <form method="post" action="<?= $router->urlFor('url.check.store', ['url_id' => (string) $url['id']]) ?>">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
   </form>
 </div>
@@ -44,9 +46,9 @@
       <tr>
         <th scope="row"><?= $check['id'] ?></th>
         <td><?= $check['status_code'] ?></td>
-        <td><?= truncate($check['h1']) ?></td>
-        <td><?= truncate($check['title']) ?></td>
-        <td><?= truncate($check['description']) ?></td>
+        <td><?= htmlspecialchars(truncate($check['h1'])) ?></td>
+        <td><?= htmlspecialchars(truncate($check['title'])) ?></td>
+        <td><?= htmlspecialchars(truncate($check['description'])) ?></td>
         <td><?= date('d.m.Y H:i', strtotime($check['created_at'])) ?></td>
       </tr>
       <?php endforeach ?>

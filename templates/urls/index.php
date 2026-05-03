@@ -1,7 +1,7 @@
 <?php
 /** @var array $urls */
 ?>
-<h1>Сайты</h1>
+<h1 class="fw-normal">Сайты</h1>
 <div class="table-responsive-sm mt-3">
 <table class="table table-bordered table-hover" data-test="urls">
   <thead>
@@ -16,7 +16,7 @@
     <?php foreach ($urls as $url) : ?>
     <tr>
       <th scope="row"><?= $url['id'] ?></th>
-      <td><a href="/urls/<?= $url['id'] ?>" aria-label="<?= $url['name'] ?>"><?= $url['name'] ?></a></td>
+      <td><a href="<?= $router->urlFor('url', ['url_id' => (string) $url['id']]) ?>" aria-label="<?= $url['name'] ?>"><?= $url['name'] ?></a></td>
       <td>
         <?php if ($url['last_checked_at']) : ?>
             <?= date('d.m.Y H:i', strtotime($url['last_checked_at'])) ?>

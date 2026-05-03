@@ -1,3 +1,6 @@
+<?php
+/** @var \Slim\Routing\RouteParser $router */
+?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -13,7 +16,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Анализатор страниц</a>
+            <a class="navbar-brand" href="<?= $router->urlFor('home') ?>">Анализатор страниц</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -21,7 +24,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/urls">Сайты</a>
+                        <a class="nav-link" href="<?= $router->urlFor('urls') ?>">Сайты</a>
                     </li>
                 </ul>
             </div>
