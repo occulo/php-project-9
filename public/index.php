@@ -24,51 +24,64 @@ if (!is_string($dbUrl)) {
     throw new \Exception("DATABASE_URL is not set");
 }
 $pdo = Database::connect($dbUrl);
-$urlRepo = new UrlRepository($pdo);
-$checkRepo = new CheckRepository($pdo);
 
 // Container
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->addDefinitions([
-    Messages::class => function () {
-        return new Messages($_SESSION);
-    }
+    Messages::class => fn() => new Messages($_SESSION),
+    UrlRepository::class => fn() => new UrlRepository($pdo),
+    CheckRepository::class => fn() => new CheckRepository($pdo)
 ]);
-AppFactory::setContainer($containerBuilder->build());
+$container = $containerBuilder->build();
+AppFactory::setContainer($container);
 
 // App
 $app = AppFactory::create();
-$app->addErrorMiddleware(true, true, true);
+
+// Router
+$routeParser = $app->getRouteCollector()->getRouteParser();
 
 // Renderer
-$renderer = new PhpRenderer(__DIR__ . '/../templates');
-$renderer->setLayout('layout.php');
+$renderer = new PhpRenderer(__DIR__ . '/../templates', [
+    'router' => $routeParser,
+    'flash'  => $container->get(Messages::class)
+]);
+$renderer->setLayout('layouts/layout.php');
 
-// Guzzle
-$client = new Client();
+// Middleware
+$errorHandler = function (
+    Request $request,
+    Throwable $exception
+) use ($app, $renderer) {
+    if ($exception instanceof \Slim\Exception\HttpNotFoundException) {
+        $response = $app->getResponseFactory()->createResponse(404);
+        return $renderer->render($response, 'errors/404.php', ['title' => 'Страница не найдена']);
+    }
+    $response = $app->getResponseFactory()->createResponse(500);
+    return $renderer->render($response, 'errors/500.php', ['title' => 'Ошибка сервера']);
+};
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+$errorMiddleware->setDefaultErrorHandler($errorHandler);
 
 // Routes
 $app->get('/', function (Request $request, Response $response, $args) use ($renderer) {
-    $flash = $this->get(Messages::class);
     return $renderer->render($response, 'index.php', [
-        'title' => 'Анализатор страниц',
-        'flash' => $flash->getMessages()
+        'title' => 'Анализатор страниц'
     ]);
-});
+})->setName('home');
 
-$app->get('/urls', function (Request $request, Response $response, $args) use ($renderer, $urlRepo) {
-    $flash = $this->get(Messages::class);
+$app->get('/urls', function (Request $request, Response $response, $args) use ($renderer) {
+    $urlRepo = $this->get(UrlRepository::class);
     $urls = $urlRepo->getAll();
-    return $renderer->render($response, 'urls.php', [
+    return $renderer->render($response, 'urls/index.php', [
         'title' => 'Анализатор страниц - Сайты',
-        'urls' => $urls,
-        'flash' => $flash->getMessages()
+        'urls' => $urls
     ]);
-});
+})->setName('urls');
 
-$app->post('/urls', function (Request $request, Response $response, $args) use ($renderer, $urlRepo) {
+$app->post('/urls', function (Request $request, Response $response, $args) {
     $routeParser = RouteContext::fromRequest($request)->getRouteParser();
-    $flash = $this->get(Messages::class);
+    $urlRepo = $this->get(UrlRepository::class);
     $data = $request->getParsedBody();
     $data = is_array($data) ? $data : [];
 
@@ -79,17 +92,14 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
 
     $url = trim($data['url'] ?? '');
 
+    $flash = $this->get(Messages::class);
     if (!$validator->validate()) {
-        $errors = $validator->errors();
-        if (!is_array($errors)) {
-            $errors = [];
-        }
+        $errors = is_array($validator->errors()) ? $validator->errors() : [];
         $validatorErrors = array_merge(...array_values($errors));
-        return $renderer->render($response, 'index.php', [
-            'title' => 'Анализатор страниц',
-            'urlValue' => $url,
-            'flash' => ['danger' => $validatorErrors]
-        ])->withStatus(422);
+        foreach ($validatorErrors as $error) {
+            $flash->addMessage('danger', $error);
+        }
+        return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('home'));
     }
 
     $parsedUrl = parse_url($url);
@@ -109,48 +119,35 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
     $id = $urlRepo->insert($normalizedUrl);
     $flash->addMessage('success', 'Страница успешно добавлена');
     return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('url', ['url_id' => (string) $id]));
-});
+})->setName('urls.store');
 
-$app->get('/urls/{url_id:[0-9]+}', function (
-    Request $request,
-    Response $response,
-    array $args
-) use (
-    $renderer,
-    $urlRepo,
-    $checkRepo
-) {
-    $flash = $this->get(Messages::class);
+$app->get('/urls/{url_id:[0-9]+}', function (Request $request, Response $response, $args) use ($renderer) {
+    $urlRepo = $this->get(UrlRepository::class);
+    $checkRepo = $this->get(CheckRepository::class);
     $url = $urlRepo->getById($args['url_id']);
     if ($url === null) {
-        throw new \Exception("URL not found");
+        throw new \Slim\Exception\HttpNotFoundException($request);
     }
     $checks = $checkRepo->getByUrlId($args['url_id']);
-    return $renderer->render($response, 'url.php', [
+    return $renderer->render($response, 'urls/show.php', [
         'title' => 'Анализатор страниц - Детали',
         'url' => $url,
-        'checks' => $checks,
-        'flash' => $flash->getMessages()
+        'checks' => $checks
     ]);
 })->setName('url');
 
-$app->post('/urls/{url_id:[0-9]+}/checks', function (
-    Request $request,
-    Response $response,
-    $args
-) use (
-    $client,
-    $urlRepo,
-    $checkRepo
-) {
+$app->post('/urls/{url_id:[0-9]+}/checks', function (Request $request, Response $response, $args) {
     $routeParser = RouteContext::fromRequest($request)->getRouteParser();
-    $flash = $this->get(Messages::class);
+    $client = new Client();
+    $urlRepo = $this->get(UrlRepository::class);
+    $checkRepo = $this->get(CheckRepository::class);
 
     $url = $urlRepo->getById($args['url_id']);
     if ($url === null) {
-        throw new \Exception("URL not found");
+        throw new \Slim\Exception\HttpNotFoundException($request);
     }
 
+    $flash = $this->get(Messages::class);
     try {
         $check = $client->get($url['name']);
         $status = $check->getStatusCode();
@@ -175,6 +172,6 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (
         'Location',
         $routeParser->urlFor('url', ['url_id' => (string) $args['url_id']])
     );
-});
+})->setName('url.check.store');
 
 $app->run();
