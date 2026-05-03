@@ -30,7 +30,7 @@
             </div>
         </div>
     </nav>
-    <?php include __DIR__ . '/flash.php' ?>
+    <?= $this->fetch('shared/flash.php') ?>
     <main class="container border rounded bg-body-tertiary p-4 mt-4">
         <?= $content ?? '' ?>
     </main>
