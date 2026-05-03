@@ -49,10 +49,7 @@ $renderer = new PhpRenderer(__DIR__ . '/../templates', [
 $renderer->setLayout('layouts/layout.php');
 
 // Middleware
-$errorHandler = function (
-    Request $request,
-    Throwable $exception
-) use ($app, $renderer) {
+$errorHandler = function (Request $request, Throwable $exception) use ($app, $renderer) {
     if ($exception instanceof \Slim\Exception\HttpNotFoundException) {
         $response = $app->getResponseFactory()->createResponse(404);
         return $renderer->render($response, 'errors/404.php', ['title' => 'Страница не найдена']);
@@ -72,10 +69,17 @@ $app->get('/', function (Request $request, Response $response, $args) use ($rend
 
 $app->get('/urls', function (Request $request, Response $response, $args) use ($renderer) {
     $urlRepo = $this->get(UrlRepository::class);
+    $checkRepo = $this->get(CheckRepository::class);
     $urls = $urlRepo->getAll();
+    $checks = $checkRepo->getAllLatest();
+    $sortedUrls = array_map(function ($url) use ($checks) {
+        $check = $checks[$url['id']] ?? [];
+        return array_merge($url, $check);
+    }, $urls);
+    usort($sortedUrls, fn($a, $b) => strtotime($b['last_checked_at']) - strtotime($a['last_checked_at']));
     return $renderer->render($response, 'urls/index.php', [
         'title' => 'Анализатор страниц - Сайты',
-        'urls' => $urls
+        'urls' => $sortedUrls
     ]);
 })->setName('urls');
 
