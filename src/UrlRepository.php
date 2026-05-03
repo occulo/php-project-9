@@ -27,24 +27,20 @@ class UrlRepository
 
     public function getAll(): array
     {
-        $stmt = $this->pdo->prepare("
-            SELECT
-                urls.id,
-                urls.name,
-                urls.created_at,
-                url_checks.status_code,
-                url_checks.created_at as last_checked_at
-            FROM urls
-            LEFT JOIN url_checks ON urls.id = url_checks.url_id
-                AND url_checks.id = (
-                    SELECT MAX(id)
-                    FROM url_checks
-                    WHERE url_id = urls.id
-                )
-            ORDER BY last_checked_at DESC NULLS LAST
-        ");
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $urls = $this->pdo->query("SELECT * FROM urls")->fetchAll();
+        $checks = $this->pdo->query(
+            "SELECT DISTINCT ON (url_id) url_id, status_code, created_at as last_checked_at
+            FROM url_checks
+            ORDER BY url_id, created_at DESC"
+        )->fetchAll(\PDO::FETCH_UNIQUE);
+
+        $result = array_map(function ($url) use ($checks) {
+            $check = $checks[$url['id']] ?? [];
+            return array_merge($url, $check);
+        }, $urls);
+        usort($result, fn($a, $b) => strtotime($b['last_checked_at']) - strtotime($a['last_checked_at']));
+
+        return $result;
     }
 
     public function insert(string $name): int
