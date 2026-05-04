@@ -70,13 +70,24 @@ $app->get('/', function (Request $request, Response $response, $args) use ($rend
 $app->get('/urls', function (Request $request, Response $response, $args) use ($renderer) {
     $urlRepo = $this->get(UrlRepository::class);
     $checkRepo = $this->get(CheckRepository::class);
+
     $urls = $urlRepo->getAll();
     $checks = $checkRepo->getAllLatest();
     $sortedUrls = array_map(function ($url) use ($checks) {
         $check = $checks[$url['id']] ?? [];
         return array_merge($url, $check);
     }, $urls);
-    usort($sortedUrls, fn($a, $b) => strtotime($b['last_checked_at']) - strtotime($a['last_checked_at']));
+
+    usort($sortedUrls, function ($a, $b) {
+        if (!isset($a['last_checked_at'])) {
+            return 1;
+        }
+        if (!isset($b['last_checked_at'])) {
+            return -1;
+        }
+        return strtotime($b['last_checked_at']) - strtotime($a['last_checked_at']);
+    });
+
     return $renderer->render($response, 'urls/index.php', [
         'title' => 'Анализатор страниц - Сайты',
         'urls' => $sortedUrls
