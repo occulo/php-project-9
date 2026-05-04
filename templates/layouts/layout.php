@@ -31,6 +31,11 @@
         </div>
     </nav>
     <?= $this->fetch('shared/flash.php') ?>
+    <?php if (isset($errors)) : ?>
+        <?php foreach ($errors as $error) : ?>
+            <div class="container alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endforeach ?>
+    <?php endif ?>
     <main class="container border rounded bg-body-tertiary p-4 mt-4">
         <?= $content ?? '' ?>
     </main>
