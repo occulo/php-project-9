@@ -10,7 +10,7 @@ class UrlRepository
     {
         $this->pdo = $pdo;
     }
-    
+
     public function getAll(): array
     {
         $stmt = $this->pdo->query("SELECT * FROM urls ORDER BY created_at DESC");
