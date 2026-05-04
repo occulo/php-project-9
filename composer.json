@@ -15,7 +15,8 @@
         "symfony/css-selector": "^7.4"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^4.0"
+        "squizlabs/php_codesniffer": "^4.0",
+        "phpunit/phpunit": "^12.5"
     },
     "autoload": {
         "files": [
