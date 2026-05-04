@@ -94,7 +94,7 @@ $app->get('/urls', function (Request $request, Response $response, $args) use ($
     ]);
 })->setName('urls');
 
-$app->post('/urls', function (Request $request, Response $response, $args) {
+$app->post('/urls', function (Request $request, Response $response, $args) use ($renderer) {
     $routeParser = RouteContext::fromRequest($request)->getRouteParser();
     $urlRepo = $this->get(UrlRepository::class);
     $data = $request->getParsedBody();
@@ -111,10 +111,11 @@ $app->post('/urls', function (Request $request, Response $response, $args) {
     if (!$validator->validate()) {
         $errors = is_array($validator->errors()) ? $validator->errors() : [];
         $validatorErrors = array_merge(...array_values($errors));
-        foreach ($validatorErrors as $error) {
-            $flash->addMessage('danger', $error);
-        }
-        return $response->withStatus(302)->withHeader('Location', $routeParser->urlFor('home'));
+        return $renderer->render($response, 'index.php', [
+            'title' => 'Анализатор страниц',
+            'urlValue' => $url,
+            'errors' => $validatorErrors
+        ])->withStatus(422);
     }
 
     $parsedUrl = parse_url($url);
