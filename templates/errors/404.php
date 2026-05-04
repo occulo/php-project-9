@@ -1,3 +1,6 @@
+<?php
+/** @var \Slim\Routing\RouteParser $router */
+?>
 <div class="d-flex justify-content-center align-items-center">
     <div class="text-center">
         <h1 class="display-3 fw-bold">404</h1>

@@ -1,4 +1,5 @@
 <?php
+/** @var \Slim\Routing\RouteParser $router */
 /** @var array $urls */
 ?>
 <h1 class="fw-normal">Сайты</h1>

@@ -1,5 +1,6 @@
 <?php
 /** @var \Slim\Routing\RouteParser $router */
+/** @var \Slim\Views\PhpRenderer $this */
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">

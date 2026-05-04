@@ -1,4 +1,5 @@
 <?php
+/** @var \Slim\Routing\RouteParser $router */
 /** @var array $url */
 /** @var array $checks */
 ?>
