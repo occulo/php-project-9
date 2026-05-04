@@ -12,8 +12,8 @@ class HtmlParsingTest extends TestCase
     public function testHtmlParsing(): void
     {
         $filepath = self::FIXTURES_DIR . '/page.html';
-        $this->assertFileExists($filepath);
         $html = file_get_contents($filepath);
+        $this->assertNotFalse($html);
 
         $crawler = new Crawler($html);
         $title = $crawler->filter('title')->text();
