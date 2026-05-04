@@ -1,7 +1,7 @@
 <?php
+
 /** @var \Slim\Routing\RouteParser $router */
 ?>
-
 <h1 class="display-3">Анализатор страниц</h1>
 <p class="fs-5 fw-light">
     Бесплатно проверяйте сайты на SEO-пригодность
