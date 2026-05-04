@@ -4,10 +4,10 @@ install:
 	composer install
 
 lint:
-	composer exec --verbose phpcs -- public src
+	composer exec --verbose phpcs -- public src tests
 
 lint-fix:
-	composer exec --verbose phpcbf -- public src
+	composer exec --verbose phpcbf -- public src tests
 
 test:
 	composer exec --verbose phpunit tests
