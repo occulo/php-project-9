@@ -8,3 +8,8 @@
         </div>
     <?php endforeach; ?>
 <?php endforeach; ?>
+<?php if (isset($errors)) : ?>
+    <?php foreach ($errors as $error) : ?>
+        <div class="container alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <?php endforeach ?>
+<?php endif ?>
