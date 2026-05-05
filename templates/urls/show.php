@@ -45,12 +45,12 @@
     <tbody>
       <?php foreach ($checks as $check) : ?>
       <tr>
-        <th scope="row"><?= $check['id'] ?></th>
-        <td><?= $check['status_code'] ?></td>
+        <th scope="row"><?= htmlspecialchars((string) $check['id']) ?></th>
+        <td><?= htmlspecialchars((string) $check['status_code']) ?></td>
         <td><?= htmlspecialchars(truncate($check['h1'])) ?></td>
         <td><?= htmlspecialchars(truncate($check['title'])) ?></td>
         <td><?= htmlspecialchars(truncate($check['description'])) ?></td>
-        <td><?= date('d.m.Y H:i', strtotime($check['created_at'])) ?></td>
+        <td><?= htmlspecialchars(date('d.m.Y H:i', strtotime($check['created_at']))) ?></td>
       </tr>
       <?php endforeach ?>
     </tbody>
