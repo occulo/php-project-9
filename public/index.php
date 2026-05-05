@@ -7,6 +7,7 @@ use Slim\Routing\RouteContext;
 use Slim\Factory\AppFactory;
 use Slim\Views\PhpRenderer;
 use Slim\Flash\Messages;
+use Slim\Exception\HttpNotFoundException;
 use Valitron\Validator;
 use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
@@ -44,13 +45,14 @@ $routeParser = $app->getRouteCollector()->getRouteParser();
 // Renderer
 $renderer = new PhpRenderer(__DIR__ . '/../templates', [
     'router' => $routeParser,
-    'flash'  => $container->get(Messages::class)
+    'flash'  => $container->get(Messages::class),
+    'errors'  => []
 ]);
 $renderer->setLayout('layouts/layout.php');
 
-// Middleware
+// Error Handler
 $errorHandler = function (Request $request, Throwable $exception) use ($app, $renderer) {
-    if ($exception instanceof \Slim\Exception\HttpNotFoundException) {
+    if ($exception instanceof HttpNotFoundException) {
         $response = $app->getResponseFactory()->createResponse(404);
         return $renderer->render($response, 'errors/404.php', ['title' => 'Страница не найдена']);
     }
@@ -78,16 +80,6 @@ $app->get('/urls', function (Request $request, Response $response, $args) use ($
         return array_merge($url, $check);
     }, $urls);
 
-    usort($sortedUrls, function ($a, $b) {
-        if (!isset($a['last_checked_at'])) {
-            return 1;
-        }
-        if (!isset($b['last_checked_at'])) {
-            return -1;
-        }
-        return strtotime($b['last_checked_at']) - strtotime($a['last_checked_at']);
-    });
-
     return $renderer->render($response, 'urls/index.php', [
         'title' => 'Анализатор страниц - Сайты',
         'urls' => $sortedUrls
@@ -111,10 +103,10 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
     if (!$validator->validate()) {
         $errors = is_array($validator->errors()) ? $validator->errors() : [];
         $validatorErrors = array_merge(...array_values($errors));
+        $renderer->addAttribute('errors', $validatorErrors);
         return $renderer->render($response, 'index.php', [
             'title' => 'Анализатор страниц',
-            'urlValue' => $url,
-            'errors' => $validatorErrors
+            'urlValue' => $url
         ])->withStatus(422);
     }
 
@@ -142,7 +134,7 @@ $app->get('/urls/{url_id:[0-9]+}', function (Request $request, Response $respons
     $checkRepo = $this->get(CheckRepository::class);
     $url = $urlRepo->getById($args['url_id']);
     if ($url === null) {
-        throw new \Slim\Exception\HttpNotFoundException($request);
+        throw new HttpNotFoundException($request);
     }
     $checks = $checkRepo->getByUrlId($args['url_id']);
     return $renderer->render($response, 'urls/show.php', [
@@ -160,7 +152,7 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (Request $request, Response 
 
     $url = $urlRepo->getById($args['url_id']);
     if ($url === null) {
-        throw new \Slim\Exception\HttpNotFoundException($request);
+        throw new HttpNotFoundException($request);
     }
 
     $flash = $this->get(Messages::class);
