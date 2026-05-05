@@ -3,6 +3,8 @@
 /** @var \Slim\Routing\RouteParser $router */
 /** @var array $url */
 /** @var array $checks */
+
+use Hexlet\Code\Helpers\Str;
 ?>
 <h1 class="fw-normal">Сайт: <?= htmlspecialchars($url['name']) ?></h1>
 <div class="table-responsive my-3">
@@ -48,9 +50,9 @@
       <tr>
         <th scope="row"><?= htmlspecialchars((string) $check['id']) ?></th>
         <td><?= htmlspecialchars((string) $check['status_code']) ?></td>
-        <td><?= htmlspecialchars(truncate($check['h1'])) ?></td>
-        <td><?= htmlspecialchars(truncate($check['title'])) ?></td>
-        <td><?= htmlspecialchars(truncate($check['description'])) ?></td>
+        <td><?= htmlspecialchars(Str::truncate($check['h1'])) ?></td>
+        <td><?= htmlspecialchars(Str::truncate($check['title'])) ?></td>
+        <td><?= htmlspecialchars(Str::truncate($check['description'])) ?></td>
         <td><?= htmlspecialchars(date('d.m.Y H:i', strtotime($check['created_at']))) ?></td>
       </tr>
       <?php endforeach ?>
