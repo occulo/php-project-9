@@ -12,8 +12,8 @@ use Valitron\Validator;
 use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Hexlet\Code\Database;
-use Hexlet\Code\UrlRepository;
-use Hexlet\Code\CheckRepository;
+use Hexlet\Code\Repository\UrlRepository;
+use Hexlet\Code\Repository\CheckRepository;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
