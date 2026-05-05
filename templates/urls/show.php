@@ -1,10 +1,10 @@
 <?php
 
+use Hexlet\Code\Helpers\Str;
+
 /** @var \Slim\Routing\RouteParser $router */
 /** @var array $url */
 /** @var array $checks */
-
-use Hexlet\Code\Helpers\Str;
 ?>
 <h1 class="fw-normal">Сайт: <?= htmlspecialchars($url['name']) ?></h1>
 <div class="table-responsive my-3">
