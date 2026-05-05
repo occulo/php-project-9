@@ -10,10 +10,11 @@ use Slim\Flash\Messages;
 use Slim\Exception\HttpNotFoundException;
 use Valitron\Validator;
 use GuzzleHttp\Client;
-use Symfony\Component\DomCrawler\Crawler;
 use Hexlet\Code\Database;
 use Hexlet\Code\Repository\UrlRepository;
 use Hexlet\Code\Repository\CheckRepository;
+use Hexlet\Code\HtmlParser;
+use Hexlet\Code\UrlNormalizer;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -110,11 +111,7 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
         ])->withStatus(422);
     }
 
-    $parsedUrl = parse_url($url);
-    if (!isset($parsedUrl['scheme'], $parsedUrl['host'])) {
-        throw new \Exception("URL is invalid");
-    }
-    $normalizedUrl = sprintf("%s://%s", $parsedUrl['scheme'], $parsedUrl['host']);
+    $normalizedUrl = UrlNormalizer::normalize($url);
 
     if ($existing = $urlRepo->getByName($normalizedUrl)) {
         $flash->addMessage('warning', 'Страница уже существует');
@@ -168,10 +165,10 @@ $app->post('/urls/{url_id:[0-9]+}/checks', function (Request $request, Response 
         );
     }
 
-    $crawler = new Crawler($html);
-    $h1 = ($node = $crawler->filter('h1'))->count() ? $node->text() : null;
-    $title = ($node = $crawler->filter('title'))->count() ? $node->text() : null;
-    $description = ($node = $crawler->filter('meta[name="description"]'))->count() ? $node->attr('content') : null;
+    $htmlParser = new HtmlParser($html);
+    $h1 = $htmlParser->getElement('h1');
+    $title = $htmlParser->getElement('title');
+    $description = $htmlParser->getMetaByName('description');
 
     $checkRepo->insert($args['url_id'], $status, $h1, $title, $description);
 
