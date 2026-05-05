@@ -1,4 +1,5 @@
 <?php
+
 /** @var \Slim\Routing\RouteParser $router */
 /** @var \Slim\Views\PhpRenderer $this */
 ?>

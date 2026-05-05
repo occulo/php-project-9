@@ -1,4 +1,5 @@
 <?php
+
 /** @var \Slim\Flash\Messages $flash */
 ?>
 <?php foreach ($flash->getMessages() as $type => $messages) : ?>
