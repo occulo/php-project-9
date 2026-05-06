@@ -32,7 +32,7 @@
             </div>
         </div>
     </nav>
-    <?= $this->fetch('shared/flash.php') ?>
+    <?= $this->fetch('shared/flash.php', ['errors' => $errors ?? []]) ?>
     <main class="container border rounded bg-body-tertiary p-4 mt-4">
         <?= $content ?? '' ?>
     </main>

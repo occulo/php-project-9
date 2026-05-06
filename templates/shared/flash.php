@@ -1,6 +1,7 @@
 <?php
 
 /** @var \Slim\Flash\Messages $flash */
+/** @var array $errors */
 ?>
 <?php foreach ($flash->getMessages() as $type => $messages) : ?>
     <?php foreach ($messages as $message) : ?>
@@ -9,8 +10,8 @@
         </div>
     <?php endforeach; ?>
 <?php endforeach; ?>
-<?php if (isset($errors)) : ?>
-    <?php foreach ($errors as $error) : ?>
+<?php foreach ($errors as $field => $fieldErrors) : ?>
+    <?php foreach ($fieldErrors as $error) : ?>
         <div class="container alert alert-danger"><?= htmlspecialchars($error) ?></div>
-    <?php endforeach ?>
-<?php endif ?>
+    <?php endforeach; ?>
+<?php endforeach; ?>
