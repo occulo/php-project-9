@@ -46,8 +46,7 @@ $routeParser = $app->getRouteCollector()->getRouteParser();
 // Renderer
 $renderer = new PhpRenderer(__DIR__ . '/../templates', [
     'router' => $routeParser,
-    'flash'  => $container->get(Messages::class),
-    'errors'  => []
+    'flash'  => $container->get(Messages::class)
 ]);
 $renderer->setLayout('layouts/layout.php');
 
@@ -100,19 +99,17 @@ $app->post('/urls', function (Request $request, Response $response, $args) use (
 
     $url = trim($data['url'] ?? '');
 
-    $flash = $this->get(Messages::class);
     if (!$validator->validate()) {
-        $errors = is_array($validator->errors()) ? $validator->errors() : [];
-        $validatorErrors = array_merge(...array_values($errors));
-        $renderer->addAttribute('errors', $validatorErrors);
         return $renderer->render($response, 'index.php', [
             'title' => 'Анализатор страниц',
-            'urlValue' => $url
+            'urlValue' => $url,
+            'errors' => $validator->errors()
         ])->withStatus(422);
     }
 
     $normalizedUrl = UrlNormalizer::normalize($url);
 
+    $flash = $this->get(Messages::class);
     if ($existing = $urlRepo->getByName($normalizedUrl)) {
         $flash->addMessage('warning', 'Страница уже существует');
         return $response->withStatus(302)->withHeader(
